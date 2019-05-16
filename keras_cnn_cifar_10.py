@@ -46,7 +46,34 @@ y_validation = np_utils.to_categorical(y_validation)
 num_classes = y_train.shape[1]
 
 
-# 定义模型创建函数
+def create_big_model(epochs=25):
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), input_shape=(3, 32, 32), padding='same', activation='relu', kernel_constraint=maxnorm(3)))
+    model.add(Dropout(0.2))
+    model.add(Conv2D(32, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Dropout(0.5))
+    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Dropout(0.2))
+    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Flatten())
+    model.add(Dropout(0.5))
+    model.add(Dense(1024, activation='relu', kernel_constraint=maxnorm(3)))
+    model.add(Dropout(0.2))
+    model.add(Dense(512, activation='relu', kernel_constraint=maxnorm(3)))
+    model.add(Dropout(0.5))
+    model.add(Dense(10, activation='softmax'))
+    lrate = 0.01
+    decay = lrate/epochs
+    sgd = SGD(lr=lrate, momentum=0.9, decay=decay, nesterov=False)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    return model
+
+
 def create_model(epochs=25):
     print('in Create_model')
     model = Sequential()
@@ -67,25 +94,24 @@ def create_model(epochs=25):
 
 # 训练模型及评估模型
 # model.fit(x=x_train, y=y_train, epochs=epochs, batch_size=32, verbose=2)
-# score = model.evaluate(x=x_validation, y=y_validation, verbose=0)
-# print('Accuracy: %.2f%%' % (score[1] * 100))
 
 print('x_train.shape is ', x_train.shape, 'y_train.shape is ', y_train.shape,
       'x_validation.shape is ', x_validation.shape, 'y_validation.shape is ', y_validation.shape)
 
 def keras_cnn_test(x_data, y_data):
     epochs = 25
-    model = create_model(epochs)
+    # model = create_model(epochs)
+    model = create_big_model(epochs)
 
     total_iter_num = 0
-    max_epochs = 10
+    max_epochs = 100
     batch_size = 32
     for epoch in range(max_epochs):
         print('current epoch is ', epoch)
         for batch_X, batch_y in batcher(x_train, y_train, batch_size):
             total_iter_num += 1
             model.train_on_batch(batch_X, batch_y)
-            if total_iter_num%50==0:
+            if total_iter_num%100==0:
                 train_score = model.evaluate(x=batch_X, y=batch_y, verbose=0)
                 val_score = model.evaluate(x=x_validation, y=y_validation, verbose=0)
                 print('epoch:{:3d} total_iter_num:{:6d}, Train Loss:{:.13f} Accuracy:{:.7f}, Val Loss:{:.13f} Accuracy: {:.7f}'.format(
