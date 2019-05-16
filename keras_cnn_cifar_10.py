@@ -4,7 +4,7 @@ import time
 
 from keras.datasets import cifar10
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Dense, Dropout, Flatten, BatchNormalization
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.optimizers import SGD
 from keras.constraints import maxnorm
@@ -12,6 +12,37 @@ from keras.utils import np_utils
 from keras import backend
 
 backend.set_image_data_format('channels_first')
+
+# 设定随机数种子
+seed = 7
+np.random.seed(seed)
+
+def unPickle(file):
+    import pickle as pk
+    with open(file, 'rb') as f:
+        d = pk.load(f, encoding='bytes')
+    return d
+
+def read_cifar_10_from_file(file_name):
+    print('in read_cifar_10_from_file')
+    data = unPickle(file_name)
+    img = data[b'data']
+    print('img.shape is', img.shape)  # 显示为（10000，3072）
+
+    img_0 = img[0] #得到第一张图像
+    img_reshape = img_0.reshape(3,32,32)
+    import PIL.Image as image
+    import matplotlib.pyplot as plt
+    r = image.fromarray(img_reshape[0]).convert('L')
+    g = image.fromarray(img_reshape[1]).convert('L')
+    b = image.fromarray(img_reshape[2]).convert('L')
+    img_m = image.merge('RGB',(r,g,b))
+    plt.imshow(img_m)
+    plt.show()
+
+
+# read_cifar_10_from_file('./data/cifar-10-python/cifar-10-batches-py/data_batch_1')
+
 
 def batcher(X_data, y_data, batch_size=-1, random_seed=None):
     if batch_size == -1:
@@ -31,9 +62,6 @@ def batcher(X_data, y_data, batch_size=-1, random_seed=None):
         X_batch, y_batch = X_data[batch_idx], y_data[batch_idx]
         yield X_batch, y_batch
 
-# 设定随机数种子
-seed = 7
-np.random.seed(seed)
 
 # 导入数据
 (x_train, y_train), (x_validation, y_validation) = cifar10.load_data()
@@ -48,24 +76,30 @@ num_classes = y_train.shape[1]
 
 def create_big_model(epochs=25):
     model = Sequential()
-    model.add(Conv2D(32, (3, 3), input_shape=(3, 32, 32), padding='same', activation='relu', kernel_constraint=maxnorm(3)))
-    model.add(Dropout(0.2))
-    model.add(Conv2D(32, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(32, (3, 3), input_shape=(3, 32, 32), padding='same', activation='elu', kernel_constraint=maxnorm(3)))
+    # model.add(Dropout(0.2))
+    model.add(BatchNormalization())
+    model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
-    model.add(Dropout(0.5))
-    model.add(Conv2D(64, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    # model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
-    model.add(Dropout(0.2))
-    model.add(Conv2D(128, (3, 3), activation='relu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(128, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    # model.add(Dropout(0.2))
+    model.add(BatchNormalization())
+    model.add(Conv2D(128, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Flatten())
-    model.add(Dropout(0.5))
-    model.add(Dense(1024, activation='relu', kernel_constraint=maxnorm(3)))
-    model.add(Dropout(0.2))
-    model.add(Dense(512, activation='relu', kernel_constraint=maxnorm(3)))
-    model.add(Dropout(0.5))
+    # model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(1024, activation='elu', kernel_constraint=maxnorm(3)))
+    # model.add(Dropout(0.2))
+    model.add(BatchNormalization())
+    model.add(Dense(512, activation='elu', kernel_constraint=maxnorm(3)))
+    # model.add(Dropout(0.5))
+    model.add(BatchNormalization())
     model.add(Dense(10, activation='softmax'))
     lrate = 0.01
     decay = lrate/epochs
