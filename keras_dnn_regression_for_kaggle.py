@@ -1,3 +1,6 @@
+# https://www.kaggle.com/fulowa/tf-boston-test
+
+
 import math
 import numpy
 import pandas
@@ -273,8 +276,8 @@ def regression_keras(X_train, y_train, X_test, y_test):
     # model = largest_model_7_new_bn()  # final test_loss is  0.3102793127529381  final test_loss is  0.30518822146709573  final test_loss is  0.2967660487545245
 
     total_iter_num = 0  # final test_loss is  0.26741983125453156  # final test_loss is  0.2597058894791344
-    max_epochs = 200
-    batch_size = 32
+    max_epochs = 1500
+    batch_size = 8
     for epoch in range(max_epochs):
         print('current epoch is ', epoch)
         epoch_start_t = time.time()
@@ -296,13 +299,13 @@ def rmse_tsg(y_true, y_pred):
 def lightGBM_regressor_test(X_train, y_train, X_test, y_test, X_val, y_val):
     print('in lightGBM_regressor_test')
 
-    lgbm_param = {'n_estimators': 10000, 'n_jobs': -1, 'learning_rate': 0.005,
-                  'random_state': 42, 'max_depth': 5, 'min_child_samples': 3,
-                  'num_leaves': 51, 'subsample': 0.9, 'colsample_bytree': 0.9,
+    lgbm_param = {'n_estimators': 10000, 'n_jobs': -1, 'learning_rate': 0.012,
+                  'random_state': 42, 'max_depth': 8, 'min_child_samples': 5,
+                  'num_leaves': 65, 'subsample': 0.9, 'colsample_bytree': 0.9,
                   'silent': -1, 'verbose': -1}
     lgbm = lgb.LGBMRegressor(**lgbm_param)
     lgbm.fit(X_train, y_train, eval_set=[(X_train, y_train), (X_test, y_test)],
-             eval_metric='rmse', verbose=100, early_stopping_rounds=500)
+             eval_metric='rmse', verbose=10, early_stopping_rounds=500)
 
     y_val_predict = lgbm.predict(X_val)
     rmse_val = rmse_tsg(y_val_predict, y_val)
@@ -314,34 +317,34 @@ def lightGBM_regressor_test(X_train, y_train, X_test, y_test, X_val, y_val):
 # X_data = housing.data
 # y_data = housing.target
 
-housing = load_boston()
-X_data = housing.data
-y_data = housing.target
+# housing = load_boston()
+# X_data = housing.data
+# y_data = housing.target
 
-X_train, X_val, y_train, y_val = train_test_split(X_data, y_data, test_size=0.3, random_state=42)
-
-X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.05, random_state=42)
-lightGBM_regressor_test(X_train, y_train, X_test, y_test, X_val, y_val)
+# X_train, X_val, y_train, y_val = train_test_split(X_data, y_data, test_size=0.3, random_state=42)
+#
+# X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.05, random_state=42)
+# lightGBM_regressor_test(X_train, y_train, X_test, y_test, X_val, y_val)
 
 # load_boston rmse_val is   2.9195994881053777
 # fetch_california_housing()  rmse_val is  0.43870726366428275
 
-# if __name__=='__main__':
-    # housing = fetch_california_housing()
-    # X_data = housing.data
-    # y_data = housing.target
+if __name__=='__main__':
+    housing = fetch_california_housing()
+    X_data = housing.data
+    y_data = housing.target
 
     # housing = load_boston()
     # X_data = housing.data
     # y_data = housing.target
     # print('X_data.shape is ', X_data.shape,'y_data.shape is ', y_data.shape)
-    #
-    # X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.3, random_state=42)
-    # print('X_train.shape is', X_train.shape, 'y_train.shape is', y_train.shape)
-    # print('X_test.shape is', X_test.shape, 'y_test.shape is', y_test.shape)
-    # regression_keras(X_train, y_train, X_test, y_test)
+
+    X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.3, random_state=42)
+    print('X_train.shape is', X_train.shape, 'y_train.shape is', y_train.shape)
+    print('X_test.shape is', X_test.shape, 'y_test.shape is', y_test.shape)
+    regression_keras(X_train, y_train, X_test, y_test)
 
 # load boston final rmse test_loss is  2.9558485181708085
-# fetch_california_housing()  final rmse test_loss is  0.5379519009004884
+# fetch_california_housing()  rmse_val is  0.2597058894791344
 
 
