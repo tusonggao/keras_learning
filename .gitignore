@@ -1,8 +1,14 @@
+<<<<<<< HEAD
 __pycache__/*
 data/*
 submission/*
 *.png
 *.h5
+=======
+data/*
+submission/*
+
+>>>>>>> a21cb10fab4799eecca1c7e6c0a251d4ba846c1d
 
 
 

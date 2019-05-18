@@ -6,8 +6,11 @@ from keras.datasets import cifar10
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization, Input, Add, Activation, Dropout
 from keras.layers.convolutional import Conv2D, Convolution2D, MaxPooling2D, AveragePooling2D, ZeroPadding2D
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> a21cb10fab4799eecca1c7e6c0a251d4ba846c1d
 from keras.optimizers import SGD
 from keras.constraints import maxnorm
 from keras.utils import np_utils, plot_model
@@ -171,6 +174,7 @@ y_validation = np_utils.to_categorical(y_validation)
 num_classes = y_train.shape[1]
 
 
+<<<<<<< HEAD
 def create_deeper_model(epochs=25):
     model = Sequential()
     model.add(Conv2D(32, (3, 3), input_shape=(3, 32, 32), padding='same', activation='elu', kernel_constraint=maxnorm(3)))
@@ -244,6 +248,9 @@ def create_deeper_model(epochs=25):
     return model
 
 def create_deep_model(epochs=25):
+=======
+def create_big_model(epochs=25):
+>>>>>>> a21cb10fab4799eecca1c7e6c0a251d4ba846c1d
     model = Sequential()
     model.add(Conv2D(32, (3, 3), input_shape=(3, 32, 32), padding='same', activation='elu', kernel_constraint=maxnorm(3)))
     # model.add(Dropout(0.2))
@@ -261,6 +268,7 @@ def create_deep_model(epochs=25):
     model.add(Conv2D(128, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Flatten())
+<<<<<<< HEAD
     model.add(BatchNormalization())
     model.add(Dense(1024, activation='elu', kernel_constraint=maxnorm(3)))
     model.add(BatchNormalization())
@@ -268,6 +276,16 @@ def create_deep_model(epochs=25):
     model.add(BatchNormalization())
 
 
+=======
+    # model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+    model.add(Dense(1024, activation='elu', kernel_constraint=maxnorm(3)))
+    # model.add(Dropout(0.2))
+    model.add(BatchNormalization())
+    model.add(Dense(512, activation='elu', kernel_constraint=maxnorm(3)))
+    # model.add(Dropout(0.5))
+    model.add(BatchNormalization())
+>>>>>>> a21cb10fab4799eecca1c7e6c0a251d4ba846c1d
     model.add(Dense(10, activation='softmax'))
     lrate = 0.01
     decay = lrate/epochs
@@ -304,8 +322,12 @@ print('x_train.shape is ', x_train.shape, 'y_train.shape is ', y_train.shape,
 def keras_cnn_test(x_data, y_data):
     epochs = 25
     # model = create_model(epochs)
+<<<<<<< HEAD
     # model = create_deep_model()
     model = create_deeper_model()
+=======
+    model = create_big_model(epochs)
+>>>>>>> a21cb10fab4799eecca1c7e6c0a251d4ba846c1d
 
     total_iter_num = 0
     max_epochs = 100
@@ -327,6 +349,7 @@ def keras_cnn_test(x_data, y_data):
 
 if __name__=='__main__':
     print('start training!')
+<<<<<<< HEAD
     keras_cnn_test(x_train, y_train)
 
     # init = (3, 32, 32)
@@ -335,6 +358,17 @@ if __name__=='__main__':
     # model = create_deeper_model()
     # model.summary()
     # plot_model(model, "./WRN-28-8.png", show_shapes=True)
+=======
+    # keras_cnn_test(x_train, y_train)
+
+    init = (3, 32, 32)
+
+    wrn_28_10 = create_wide_residual_network(init, nb_classes=10, N=4, k=10, dropout=0.0)
+
+    wrn_28_10.summary()
+
+    plot_model(wrn_28_10, "./WRN-28-8.png", show_shapes=True)
+>>>>>>> a21cb10fab4799eecca1c7e6c0a251d4ba846c1d
 
 
 
