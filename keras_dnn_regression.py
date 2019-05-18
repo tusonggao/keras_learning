@@ -205,6 +205,18 @@ def largest_model_6_new_bn():
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
 
+def largest_model_7_new_bn():
+    model = Sequential()
+    model.add(Dense(311, kernel_initializer='normal', activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dense(177, kernel_initializer='normal', activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dense(133, kernel_initializer='normal', activation='relu'))
+    model.add(BatchNormalization())
+    model.add(Dense(1, kernel_initializer='normal'))
+    model.compile(loss='mean_squared_error', optimizer='adam')
+    return model
+
 
 
 def wider_model():
@@ -237,7 +249,8 @@ def regression_keras(X_train, y_train, X_test, y_test):
     # model = largest_model_4_new()  # final test_loss is  0.29989305565985597  final test_loss is  0.32538971955616036  final test_loss is  0.29629954988334223
     # model = largest_model_5_new()  # final test_loss is  0.2898472023102664   final test_loss is  0.29703074012153835  final test_loss is  0.2863174539627339
     # model = largest_model_6_new()  # final test_loss is  0.3271503668923403  final test_loss is  0.2984573458169782  final test_loss is  0.34617327226840866
-    model = largest_model_6_new_bn()  # final test_loss is  0.3331636275893958  final test_loss is  0.33187634780887487  final test_loss is  0.41732066673363827
+    # model = largest_model_6_new_bn()  # final test_loss is  0.3331636275893958  final test_loss is  0.33187634780887487  final test_loss is  0.41732066673363827
+    model = largest_model_7_new_bn()  # final test_loss is  0.3102793127529381
 
     total_iter_num = 0
     max_epochs = 10
@@ -257,12 +270,13 @@ def regression_keras(X_train, y_train, X_test, y_test):
     print('final test_loss is ', val_score)
 
 
-housing = fetch_california_housing()
-X_data = housing.data
-y_data = housing.target
+if __name__=='__main__':
+    housing = fetch_california_housing()
+    X_data = housing.data
+    y_data = housing.target
 
-X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.3, random_state=42)
-print('X_train.shape is', X_train.shape, 'y_train.shape is', y_train.shape)
-print('X_test.shape is', X_test.shape, 'y_test.shape is', y_test.shape)
-regression_keras(X_train, y_train, X_test, y_test)
+    X_train, X_test, y_train, y_test = train_test_split(X_data, y_data, test_size=0.3, random_state=42)
+    print('X_train.shape is', X_train.shape, 'y_train.shape is', y_train.shape)
+    print('X_test.shape is', X_test.shape, 'y_test.shape is', y_test.shape)
+    regression_keras(X_train, y_train, X_test, y_test)
 
