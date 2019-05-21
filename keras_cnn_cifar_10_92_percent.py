@@ -2,6 +2,7 @@
 # https://github.com/olympus999/cifar-10-wrn
 # https://github.com/titu1994/Wide-Residual-Networks
 
+import time
 import numpy as np
 import sklearn.metrics as metrics
 
@@ -16,7 +17,8 @@ from keras import backend as K
 print('hello world!')
 
 batch_size = 100
-nb_epoch = 100
+# nb_epoch = 100
+nb_epoch = 1
 img_rows, img_cols = 32, 32
 
 (trainX, trainY), (testX, testY) = cifar10.load_data()
@@ -56,6 +58,8 @@ print("Allocating GPU memory")
 # model.load_weights("weights/WRN-28-8 Weights.h5")
 # print("Model loaded.")
 
+start_t = time.time()
+
 model.fit_generator(generator.flow(trainX, trainY, batch_size=batch_size), steps_per_epoch=len(trainX) // batch_size + 1, nb_epoch=nb_epoch,
                    callbacks=[callbacks.ModelCheckpoint("WRN-28-8 Weights.h5", monitor="val_acc", save_best_only=True)],
                    validation_data=(testX, testY),
@@ -70,3 +74,5 @@ accuracy = metrics.accuracy_score(yTrue, yPred) * 100
 error = 100 - accuracy
 print("Accuracy : ", accuracy)
 print("Error : ", error)
+
+print('total cost timed: ', time.time()-start_t)

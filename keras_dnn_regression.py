@@ -318,10 +318,18 @@ housing = load_boston()
 X_data = housing.data
 y_data = housing.target
 
-X_train, X_val, y_train, y_val = train_test_split(X_data, y_data, test_size=0.3, random_state=42)
+np.random.seed(1001)
+np.random.rand(3, 2)
+current_random_state = np.random.get_state()
+print(np.random.rand(3, 2))
+np.random.set_state(current_random_state)
 
-X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.05, random_state=42)
-lightGBM_regressor_test(X_train, y_train, X_test, y_test, X_val, y_val)
+print(np.random.rand(3, 2))
+
+# X_train, X_val, y_train, y_val = train_test_split(X_data, y_data, test_size=0.3, random_state=42)
+#
+# X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.05, random_state=42)
+# lightGBM_regressor_test(X_train, y_train, X_test, y_test, X_val, y_val)
 
 # load_boston rmse_val is   2.9195994881053777
 # fetch_california_housing()  rmse_val is  0.43870726366428275
