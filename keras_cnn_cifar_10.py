@@ -159,66 +159,73 @@ num_classes = y_train.shape[1]
 def create_deeper_model(epochs=25):
     model = Sequential()
 
-    model.add(Conv2D(32, (3, 3), input_shape=(3, 32, 32), padding='same', activation='elu', kernel_constraint=maxnorm(3)))
+    # model.add(Conv2D(32, (3, 3), input_shape=(3, 32, 32), padding='same', activation='elu', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(32, (3, 3), input_shape=(3, 32, 32), padding='same', activation='elu', kernel_initializer = 'he_uniform'))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
-    # model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(BatchNormalization())
-
-    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
-    model.add(BatchNormalization())
-
-    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(256, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(256, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
-    model.add(BatchNormalization())
-
-    model.add(Conv2D(256, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     # model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(128, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(256, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(256, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
+    model.add(BatchNormalization())
+
+    model.add(Conv2D(256, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(BatchNormalization())
+
+    model.add(Conv2D(128, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
+    model.add(BatchNormalization())
+
+    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     # model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_initializer = 'he_uniform'))
     # model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
 
     model.add(Flatten())
 
-    model.add(Dense(1024, activation='elu', kernel_constraint=maxnorm(3)))
+    model.add(Dense(1024, activation='elu', kernel_initializer = 'he_uniform'))
     model.add(BatchNormalization())
 
-    model.add(Dense(512, activation='elu', kernel_constraint=maxnorm(3)))
+    model.add(Dense(825, activation='elu', kernel_initializer='he_uniform'))
     model.add(BatchNormalization())
 
-    model.add(Dense(512, activation='elu', kernel_constraint=maxnorm(3)))
+    model.add(Dense(765, activation='elu', kernel_initializer='he_uniform'))
     model.add(BatchNormalization())
 
-    model.add(Dense(256, activation='elu', kernel_constraint=maxnorm(3)))
+    model.add(Dense(512, activation='elu', kernel_initializer = 'he_uniform'))
+    model.add(BatchNormalization())
+
+    model.add(Dense(512, activation='elu', kernel_initializer = 'he_uniform'))
+    model.add(BatchNormalization())
+
+    model.add(Dense(256, activation='elu', kernel_initializer = 'he_uniform'))
     model.add(BatchNormalization())
 
     model.add(Dense(10, activation='softmax'))
@@ -233,15 +240,20 @@ def create_deeper_model(epochs=25):
 def create_big_model(epochs=25):
     model = Sequential()
     model.add(Conv2D(32, (3, 3), input_shape=(3, 32, 32), padding='same', activation='elu', kernel_constraint=maxnorm(3)))
-    # model.add(Dropout(0.2))
     model.add(BatchNormalization())
+
     model.add(Conv2D(32, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
-    # model.add(Dropout(0.5))
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(BatchNormalization())
+
     model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(BatchNormalization())
+
+    model.add(Conv2D(64, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
+
+    # model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(BatchNormalization())
+
     model.add(Conv2D(128, (3, 3), activation='elu', padding='same', kernel_constraint=maxnorm(3)))
     # model.add(Dropout(0.2))
     model.add(BatchNormalization())
@@ -306,6 +318,7 @@ def keras_cnn_test(x_data, y_data):
     total_iter_num = 0
     max_epochs = 100
     batch_size = 32
+    print('max_epochs is ', max_epochs)
     for epoch in range(max_epochs):
         print('current epoch is ', epoch)
         epoch_start_t = time.time()
