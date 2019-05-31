@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+# https://www.kaggle.com/kentaroyoshioka47/cnn-with-batchnormalization-in-keras-94
+
+
 import argparse
 import math
 import sys
