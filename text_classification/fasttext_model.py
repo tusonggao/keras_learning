@@ -10,6 +10,8 @@ import re
 import fasttext as ft
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
 from collections import Counter
 
 # Some preprocesssing that will be common to all the text classification methods you will see. 
@@ -21,6 +23,7 @@ puncts = [',', '.', '"', ':', ')', '(', '-', '!', '?', '|', ';', "'", '$', '&', 
 
 def clean_text(x):
     x = str(x)
+    x = x.replace('\n', ' ')  #去除掉所有的换行符
     for punct in puncts:
         x = x.replace(punct, f' {punct} ')
     return x
@@ -39,7 +42,7 @@ def create_fasttext_format_files():
     test_df["question_text"].fillna("_##_").values
 
     train_df['label'] = '__label__' + train_df.target.astype(str)
-    train_df['labels_text'] = train_df.label.str.cat(df.question_text, sep=' ')
+    train_df['labels_text'] = train_df.label.str.cat(train_df.question_text, sep=' ')
     test_df['label'] = '__label__' + test_df.target.astype(str)
 
     train_df, val_df = train_test_split(train_df, test_size=0.08, random_state=2018) # .08 since the datasize is large enough.
