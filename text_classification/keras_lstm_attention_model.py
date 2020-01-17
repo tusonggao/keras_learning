@@ -377,5 +377,3 @@ out_df['prediction'] = pred_test_y
 out_df.to_csv(f"./data/submission_{f1:.5f}.csv", index=False)
 
 print('prog ends here')
-
-
