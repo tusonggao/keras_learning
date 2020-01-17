@@ -32,7 +32,10 @@ def create_fasttext_format_files():
     print('in create_fasttext_format_files')
     train_df = pd.read_csv("./data/train_new.csv")
     test_df = pd.read_csv("./data/test_new.csv")
-    
+
+    train_df = train_df.sample(5000)
+    test_df = test_df.sample(10)
+
     print("Train shape : ",train_df.shape)
     print("Test shape : ",test_df.shape)
 
@@ -52,7 +55,7 @@ def create_fasttext_format_files():
     return  train_df, val_df, test_df
 
 train_df, val_df, test_df = create_fasttext_format_files()
-test_df = test_df.sample(30)  # 减少数据，便于观察
+#test_df = test_df.sample(30)  # 减少数据，便于观察
 
 # Function to do K-fold CV across different fasttext parameter values
 def tune(Y, X, YX, k, lr, wordNgrams, epoch):
@@ -108,13 +111,38 @@ classifier1 = ft.FastText.train_supervised('./data/train_new_fasttext_formated.c
 
 # Predict test data
 print('start fasttext predicting...')
-predictions1 = classifier1.predict(test_df.question_text.tolist())
+val_labels, val_possibilities = classifier1.predict(val_df.question_text.tolist())
 #predictions2 = classifier2.predict(df_test.ingredients.tolist())
 #predictions3 = classifier3.predict(df_test.ingredients.tolist())
 
-print('type of predictions1 is ', type(predictions1))
-print('predictions1 is ', predictions1)
-print('test_df.label is ', test_df.label)
+def f1_smart(y_true, y_pred):
+    print('in f1_smart(y_true, y_pred)')
+    thresholds = []
+    for thresh in np.arange(0.1, 0.501, 0.01):
+        thresh = np.round(thresh, 2)
+        res = metrics.f1_score(y_true, (y_pred > thresh).astype(int))
+        thresholds.append([thresh, res])
+        print("F1 score at threshold {0} is {1}".format(thresh, res))
+
+    thresholds.sort(key=lambda x: x[1], reverse=True)
+    best_thresh = thresholds[0][0]
+    best_f1 = thresholds[0][1]
+    print("Best threshold: ", best_thresh)
+    return  best_f1, best_thresh
+
+f1, threshold = f1_smart(val_df.target.values, val_possibilities)
+print('Optimal val F1: {} at threshold: {}'.format(f1, threshold))
+
+test_labels, test_possibilities = classifier1.predict(test_df.question_text.tolist())
+
+print('get final results')
+pred_test_y = (pred_test_y > threshold).astype(int)
+test_f1 = metrics.f1_score(test_df.target.values, test_possibilities)
+print('real test_f1 is ', test_f1)
+
+#print('type of predictions1 is ', type(predictions1))
+#print('predictions1 is ', predictions1)
+#print('test_df.label is ', test_df.label)
 
 sys.exit(0)
 
