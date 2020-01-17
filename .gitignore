@@ -1,5 +1,11 @@
 # added by tusonggao
 data/
+atad/
+mission/
+submission/
+nohup.out
+running_output*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
