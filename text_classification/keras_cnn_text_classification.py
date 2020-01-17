@@ -1,157 +1,123 @@
-import os
-import time
-import datetime
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from string import punctuation
+from os import listdir
+from numpy import array
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Flatten
+from keras.layers import Embedding
+from keras.layers.convolutional import Conv1D
+from keras.layers.convolutional import MaxPooling1D
 
-from sklearn.svm import SVC
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
-from sklearn.linear_model import SGDClassifier
-from sklearn.pipeline import Pipeline
+def save_list(lines, filename):
+    # convert lines to a single blob of text
+    data = '\n'.join(lines)
+    # open file
+    file = open(filename, 'w')
+    # write text
+    file.write(data)
+    # close file
+    file.close()
 
-def read_file_content(file_name):
-    content = ''
-    lines_lst = []
-    with open(file_name) as file:
-        for line in file:
-            lines_lst.append(line.strip())
-    return ' '.join(lines_lst)
+# save tokens to a vocabulary file
+save_list(tokenstokens, 'vocab.txt')
 
+# load doc into memory
+def load_doc(filename):
+    # open the file as read only
+    file = open(filename, 'r')
+    # read all text
+    text = file.read()
+    # close the file
+    file.close()
+    return text
 
-def get_all_files(root_dir):
-    lst = os.listdir(root_dir)
-    file_names_lst = []
-    for i in range(0, len(lst)):
-        path = os.path.join(root_dir, lst[i])
-        if os.path.isfile(path):
-            # print('path is ', path)
-            file_names_lst.append(lst[i])
-    print('file_names_lst is', file_names_lst)
-    return file_names_lst
-
-
-def split_all_files(root_dir, train_nums, test_nums):
-    file_names_lst = get_all_files(root_dir)
-
-    train_files_lst, test_files_lst = [], []
-    for name in file_names_lst:
-        if int(name[2:5]) in train_nums:
-            train_files_lst.append(root_dir + '/' + name)
-        elif int(name[2:5]) in test_nums:
-            test_files_lst.append(root_dir + '/' + name)
-
-    print('len of train_files_lst', len(train_files_lst),
-          'len of test_files_lst', len(test_files_lst))
-    return train_files_lst, test_files_lst
-
-def generate_data_from_raw_file():
-    train_X, train_y, test_X, test_y = [], [], [], []
-
-    nums_lst = np.arange(1000)
-    np.random.seed(42)
-    np.random.shuffle(nums_lst)
-    train_nums, test_nums = nums_lst[:700], nums_lst[700:]
-    print('train_nums[:10] is', train_nums[:10])
-
-    train_files, test_files = split_all_files(
-        'F:/using_keras/data/review_polarity/txt_sentoken/pos/',
-        train_nums, test_nums)
-    for file_name in train_files:
-        train_X.append(read_file_content(file_name))
-        train_y.append(1)
-    for file_name in test_files:
-        test_X.append(read_file_content(file_name))
-        test_y.append(1)
-
-    train_files, test_files = split_all_files(
-        'F:/using_keras/data/review_polarity/txt_sentoken/neg/',
-        train_nums, test_nums)
-    for file_name in train_files:
-        train_X.append(read_file_content(file_name))
-        train_y.append(0)
-    for file_name in test_files:
-        test_X.append(read_file_content(file_name))
-        test_y.append(0)
-
-    return train_X, train_y, test_X, test_y
+# turn a doc into clean tokens
+def clean_doc(doc, vocab):
+    # split into tokens by white space
+    tokens = doc.split()
+    # remove punctuation from each token
+    table = str.maketrans('', '', punctuation)
+    tokens = [w.translate(table) for w in tokens]
+    # filter out tokens not in vocab
+    tokens = [w for w in tokens if w in vocab]
+    tokens = ' '.join(tokens)
+    return tokens
 
 
-def data_preprocessing():
-    print('in data_processing()')
-
-    train_X, train_y, test_X, test_y = generate_data_from_raw_file()
-    print('len of train_X is ', len(train_X))
-
-    merged_X = train_X + test_X
-    count_vect = CountVectorizer()
-    merged_X = count_vect.fit_transform(merged_X)
-    train_X, test_X = merged_X[:len(train_X)], merged_X[len(train_X):]
-    train_y, test_y = np.array(train_y), np.array(test_y)
-
-    # print('train_X.shape is', train_X.shape, 'test_X.shape is', test_X.shape)
-    return train_X, train_y, test_X, test_y
-
-
-def SGGClassifier_test(train_X, train_y, test_X, test_y):
-    print('in SGGClassifier_test()')
-    text_clf = SGDClassifier(loss='hinge', penalty='l2',alpha = 1e-3,
-                             random_state = 42, max_iter = 5, tol = None)
-    text_clf.fit(train_X, train_y)
-    predicted_y = text_clf.predict(test_X)
-    accuracy = np.mean(predicted_y == test_y)
-    print('accuracy is ', accuracy)
-
-def LinearSVC_test(train_X, train_y, test_X, test_y):
-    print('in LinearSVC_test()')
-
-    text_clf = SVC(kernel='linear')
-    text_clf.fit(train_X, train_y)
-    predicted_y = text_clf.predict(test_X)
-    accuracy = np.mean(predicted_y == test_y)
-    print('accuracy is ', accuracy)
-
-def RBFSVC_test(train_X, train_y, test_X, test_y):
-    print('in RBFSVC_test()')
-
-    text_clf = SVC(kernel='rbf')
-    text_clf.fit(train_X, train_y)
-    predicted_y = text_clf.predict(test_X)
-    accuracy = np.mean(predicted_y == test_y)
-    print('accuracy is ', accuracy)
+# load all docs in a directory
+def process_docs(directory, vocab, is_trian):
+    documents = list()
+    # walk through all files in the folder
+    for filename in listdir(directory):
+        # skip any reviews in the test set
+        if is_trian and filename.startswith('cv9'):
+            continue
+        if not is_trian and not filename.startswith('cv9'):
+            continue
+        # create the full path of the file to open
+        path = directory + '/' + filename
+        # load the doc
+        doc = load_doc(path)
+        # clean doc
+        tokens = clean_doc(doc, vocab)
+        # add to list
+        documents.append(tokens)
+    return documents
 
 
-def MultinomialNB_test(train_X, train_y, test_X, test_y):
-    print('in LinearSVC_test()')
+# load the vocabulary
+vocab_filename = 'vocab.txt'
+vocab = load_doc(vocab_filename)
+vocab = vocab.split()
+vocab = set(vocab)
 
-    text_clf = MultinomialNB()
-    text_clf.fit(train_X, train_y)
-    predicted_y = text_clf.predict(test_X)
-    accuracy = np.mean(predicted_y == test_y)
-    print('accuracy is ', accuracy)
+# load all training reviews
+positive_docs = process_docs('F:/using_keras/data/review_polarity/txt_sentoken/pos', vocab, True)
+negative_docs = process_docs('F:/using_keras/data/review_polarity/txt_sentoken/neg', vocab, True)
+train_docs = negative_docs + positive_docs
 
+# create the tokenizer
+tokenizer = Tokenizer()
+# fit the tokenizer on the documents
+tokenizer.fit_on_texts(train_docs)
 
-if __name__=='__main__':
-    print('hello world!')
-    # generate_data_from_raw_file()
-    train_X, train_y, test_X, test_y = data_preprocessing()
+# sequence encode
+encoded_docs = tokenizer.texts_to_sequences(train_docs)
+# pad sequences
+max_length = max([len(s.split()) for s in train_docs])
+Xtrain = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
+# define training labels
+ytrain = array([0 for _ in range(900)] + [1 for _ in range(900)])
 
-    SGGClassifier_test(train_X, train_y, test_X, test_y)
-    LinearSVC_test(train_X, train_y, test_X, test_y)
-    RBFSVC_test(train_X, train_y, test_X, test_y)
-    MultinomialNB_test(train_X, train_y, test_X, test_y)
+# load all test reviews
+positive_docs = process_docs('txt_sentoken/pos', vocab, False)
+negative_docs = process_docs('txt_sentoken/neg', vocab, False)
+test_docs = negative_docs + positive_docs
+# sequence encode
+encoded_docs = tokenizer.texts_to_sequences(test_docs)
+# pad sequences
+Xtest = pad_sequences(encoded_docs, maxlen=max_length, padding='post')
+# define test labels
+ytest = array([0 for _ in range(100)] + [1 for _ in range(100)])
 
+# define vocabulary size (largest integer value)
+vocab_size = len(tokenizer.word_index) + 1
 
-
-
-
-
-
-
-
-
-
-
-
-
+# define model
+model = Sequential()
+model.add(Embedding(vocab_size, 100, input_length=max_length))
+model.add(Conv1D(filters=32, kernel_size=8, activation='relu'))
+model.add(MaxPooling1D(pool_size=2))
+model.add(Flatten())
+model.add(Dense(10, activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+print(model.summary())
+# compile network
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+# fit network
+model.fit(Xtrain, ytrain, epochs=10, verbose=2)
+# evaluate
+loss, acc = model.evaluate(Xtest, ytest, verbose=0)
+print('Test Accuracy: %f' % (acc * 100))
