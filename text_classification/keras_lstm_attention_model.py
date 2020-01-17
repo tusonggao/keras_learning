@@ -24,8 +24,6 @@ from keras.optimizers import Adam
 from keras.models import Model
 from keras import backend as K
 from keras.engine.topology import Layer
-from keras import initializers, regularizers, constraints, optimizers, layers
-
 from keras.layers import *
 from keras.models import *
 from keras import initializers, regularizers, constraints, optimizers, layers
@@ -59,8 +57,8 @@ print('prog ends here 111')
 # Loading the data
 def load_and_prec():
     print('in load_and_prec()')
-    train_df = pd.read_csv("./atad/train.csv")
-    test_df = pd.read_csv("./atad/test.csv")
+    train_df = pd.read_csv("./data/train_new.csv")
+    test_df = pd.read_csv("./data/test_new.csv")
     
     print("Train shape : ",train_df.shape)
     print("Test shape : ",test_df.shape)
