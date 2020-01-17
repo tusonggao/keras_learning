@@ -33,8 +33,8 @@ def create_fasttext_format_files():
     train_df = pd.read_csv("./data/train_new.csv")
     test_df = pd.read_csv("./data/test_new.csv")
 
-    train_df = train_df.sample(5000)
-    test_df = test_df.sample(10)
+    #train_df = train_df.sample(5000)
+    #test_df = test_df.sample(3000)
 
     print("Train shape : ",train_df.shape)
     print("Test shape : ",test_df.shape)
@@ -104,25 +104,27 @@ def tune(Y, X, YX, k, lr, wordNgrams, epoch):
 
 # Train final classifiers
 print('start fasttext training...')
-#data/train_new_fasttext_formated.csv
-classifier1 = ft.FastText.train_supervised('./data/train_new_fasttext_formated.csv', lr=0.1, wordNgrams=1, epoch=15)
+#classifier1 = ft.FastText.train_supervised('./data/train_new_fasttext_formated.csv', lr=0.1, wordNgrams=1, epoch=15)
+classifier1 = ft.FastText.train_supervised('./data/train_new_fasttext_formated.csv', lr=0.1, wordNgrams=2, epoch=15)
 #classifier2 = ft.FastText.train_supervised('train.txt', lr=0.1, wordNgrams=2, epoch=15)
 #classifier3 = ft.FastText.train_supervised('train.txt', lr=0.1, wordNgrams=3, epoch=15)
 
 # Predict test data
 print('start fasttext predicting...')
 val_labels, val_possibilities = classifier1.predict(val_df.question_text.tolist())
+val_possibilities = 1 - val_possibilities
 #predictions2 = classifier2.predict(df_test.ingredients.tolist())
 #predictions3 = classifier3.predict(df_test.ingredients.tolist())
 
 def f1_smart(y_true, y_pred):
     print('in f1_smart(y_true, y_pred)')
     thresholds = []
-    for thresh in np.arange(0.1, 0.501, 0.01):
+    #for thresh in np.arange(0.1, 0.601, 0.01):
+    for thresh in np.arange(0.001, 0.999, 0.001):
         thresh = np.round(thresh, 2)
         res = metrics.f1_score(y_true, (y_pred > thresh).astype(int))
         thresholds.append([thresh, res])
-        print("F1 score at threshold {0} is {1}".format(thresh, res))
+        #print("F1 score at threshold {0} is {1}".format(thresh, res))
 
     thresholds.sort(key=lambda x: x[1], reverse=True)
     best_thresh = thresholds[0][0]
@@ -134,15 +136,16 @@ f1, threshold = f1_smart(val_df.target.values, val_possibilities)
 print('Optimal val F1: {} at threshold: {}'.format(f1, threshold))
 
 test_labels, test_possibilities = classifier1.predict(test_df.question_text.tolist())
+test_possibilities = 1 - test_possibilities
+print('type of test_possibilities is ', type(test_possibilities))
+#print('test_possibilities is ', test_possibilities)
+#print('test_df.label is ', test_df.label)
 
 print('get final results')
-pred_test_y = (pred_test_y > threshold).astype(int)
-test_f1 = metrics.f1_score(test_df.target.values, test_possibilities)
+pred_test_y = (test_possibilities > threshold).astype(int)
+test_f1 = metrics.f1_score(test_df.target.values, pred_test_y)
 print('real test_f1 is ', test_f1)
 
-#print('type of predictions1 is ', type(predictions1))
-#print('predictions1 is ', predictions1)
-#print('test_df.label is ', test_df.label)
 
 sys.exit(0)
 
