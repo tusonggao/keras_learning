@@ -118,6 +118,7 @@ def load_and_prec():
     ## Get the target values
     train_y = train_df['target'].values
     val_y = val_df['target'].values  
+    test_y = test_df['target'].values
     
     #shuffling the data
     np.random.seed(2018)
@@ -129,11 +130,11 @@ def load_and_prec():
     train_y = train_y[trn_idx]
     val_y = val_y[val_idx] 
     
-    return train_X, val_X, test_X, train_y, val_y, tokenizer.word_index
+    return train_X, val_X, test_X, train_y, val_y, test_y, tokenizer.word_index
 
 
 start_t = time.time()
-train_X, val_X, test_X, train_y, val_y, word_index = load_and_prec()
+train_X, val_X, test_X, train_y, val_y, test_y, word_index = load_and_prec()
 print('after load_and_prec train_X.shape is ', train_X.shape, 'val_X.shape is ', val_X.shape)
 print('load_and_prec cost time: ', time.time() - start_t)
 #sys.exit(0)
@@ -337,7 +338,7 @@ def train_pred(model, epochs=2):
 print('get here 444')
 start_t = time.time()
 #pred_val_y, pred_test_y = train_pred(model, epochs=15)
-pred_val_y, pred_test_y = train_pred(model, epochs=2)
+pred_val_y, pred_test_y = train_pred(model, epochs=1)
 print('train_pred cost time time: ', time.time() - start_t)
 
 '''
@@ -361,14 +362,17 @@ def f1_smart(y_true, y_pred):
     return  best_f1, best_thresh
 
 f1, threshold = f1_smart(val_y, pred_val_y)
-print('Optimal F1: {} at threshold: {}'.format(f1, threshold))
+print('Optimal val F1: {} at threshold: {}'.format(f1, threshold))
 
 print('get final results')
 pred_test_y = (pred_test_y > threshold).astype(int)
-test_df = pd.read_csv("./atad/test.csv", usecols=["qid"])
+test_f1 = metrics.f1_score(test_y, pred_test_y)
+print('real test_f1 is ', test_f1)
+
+test_df = pd.read_csv("./data/test.csv", usecols=["qid"])
 out_df = pd.DataFrame({"qid":test_df["qid"].values})
 out_df['prediction'] = pred_test_y
-out_df.to_csv("./mission/submission_1.csv", index=False)
+out_df.to_csv(".//submission_1.csv", index=False)
 out_df.to_csv(f"./mission/submission_{f1:.5f}.csv", index=False)
 
 print('prog ends here')
