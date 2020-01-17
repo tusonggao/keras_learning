@@ -338,7 +338,9 @@ def train_pred(model, epochs=2):
 print('get here 444')
 start_t = time.time()
 #pred_val_y, pred_test_y = train_pred(model, epochs=15)
-pred_val_y, pred_test_y = train_pred(model, epochs=1)
+#pred_val_y, pred_test_y = train_pred(model, epochs=1)
+#pred_val_y, pred_test_y = train_pred(model, epochs=2)
+pred_val_y, pred_test_y = train_pred(model, epochs=3)
 print('train_pred cost time time: ', time.time() - start_t)
 
 '''
