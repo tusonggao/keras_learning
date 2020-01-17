@@ -3,6 +3,7 @@ data/
 atad/
 mission/
 submission/
+*.h5
 nohup.out
 running_output*
 

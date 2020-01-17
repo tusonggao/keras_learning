@@ -179,8 +179,8 @@ def load_glove(word_index):
      
     return embedding_matrix 
 
-#embedding_matrix = load_glove(word_index)
-embedding_matrix = np.random.normal(-0.005838499,0.48782197, (100000, 300))
+embedding_matrix = load_glove(word_index)
+#embedding_matrix = np.random.normal(-0.005838499,0.48782197, (100000, 300))
 print('embedding_matrix.shape is ', embedding_matrix.shape)
 #embedding_matrix.shape is  (100000, 300)
 #sys.exit(0)
@@ -369,11 +369,10 @@ pred_test_y = (pred_test_y > threshold).astype(int)
 test_f1 = metrics.f1_score(test_y, pred_test_y)
 print('real test_f1 is ', test_f1)
 
-test_df = pd.read_csv("./data/test.csv", usecols=["qid"])
+test_df = pd.read_csv("./data/test_new.csv", usecols=["qid"])
 out_df = pd.DataFrame({"qid":test_df["qid"].values})
 out_df['prediction'] = pred_test_y
-out_df.to_csv(".//submission_1.csv", index=False)
-out_df.to_csv(f"./mission/submission_{f1:.5f}.csv", index=False)
+out_df.to_csv(f"./data/submission_{f1:.5f}.csv", index=False)
 
 print('prog ends here')
 
