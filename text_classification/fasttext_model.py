@@ -1,3 +1,4 @@
+# https://www.kaggle.com/heesoo37/facebook-s-fasttext-algorithm
 from __future__ import print_function, division, with_statement
 import os
 import sys
@@ -6,7 +7,7 @@ import numpy as np
 import pandas as pd
 import fasttext
 import re
-import fastText as ft
+import fasttext as ft
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
 from collections import Counter
@@ -31,40 +32,23 @@ def create_fasttext_format_files():
     
     print("Train shape : ",train_df.shape)
     print("Test shape : ",test_df.shape)
-    
+
     train_df["question_text"] = train_df["question_text"].apply(lambda x: clean_text(x))
     test_df["question_text"] = test_df["question_text"].apply(lambda x: clean_text(x))
+    train_df["question_text"].fillna("_##_").values
+    test_df["question_text"].fillna("_##_").values
 
-    train_df
-    
-    
-    
-    
+    train_df['label'] = '__label__' + train_df.target.astype(str)
+    train_df['labels_text'] = train_df.label.str.cat(df.question_text, sep=' ')
+    test_df['label'] = '__label__' + test_df.target.astype(str)
 
-# Import data
-df_train = pd.read_json('./data/train_new.csv')
-df_test = pd.read_json('../data/test_new.csv')
+    train_df, val_df = train_test_split(train_df, test_size=0.08, random_state=2018) # .08 since the datasize is large enough.
+    train_df['labels_text'].to_csv('./data/train_new_fasttext_formated.csv', index=False, header=False)
+    print('train_df.shape is ', train_df.shape, 'val_df.shape is ', val_df.shape, 'test_df.shape is ', test_df.shape)
 
-##################
-# PRE-PROCESSING #
-##################
+    return  train_df, val_df, test_df
 
-# Concatenate ingredients for training and test data
-df.ingredients = df.ingredients.apply(lambda x: ' '.join(x))
-df_test.ingredients = df_test.ingredients.apply(lambda x: ' '.join(x))
-
-# Concatenate labels and ingredients for fasttext formatted training data
-df['labels_text'] = '__label__' + df.cuisine 
-df.labels_text = df.labels_text.str.cat(df.ingredients, sep=' ')
-
-# Write training data to a file as required by fasttext
-training_file = open('train.txt','w')
-training_file.writelines(df.labels_text + '\n')
-training_file.close()
-
-################
-# MODEL TUNING #
-################
+train_df, val_df, test_df = create_fasttext_format_files()
 
 # Function to do K-fold CV across different fasttext parameter values
 def tune(Y, X, YX, k, lr, wordNgrams, epoch):
@@ -111,30 +95,27 @@ def tune(Y, X, YX, k, lr, wordNgrams, epoch):
 #     wordNgrams = [1,2,3],
 #     epoch = [15,17,20])
 
-#########################
-# TRAINING & PREDICTION #
-#########################
-
 # Train final classifiers
-classifier1 = ft.FastText.train_supervised('train.txt', lr=0.1, wordNgrams=1, epoch=15)
-classifier2 = ft.FastText.train_supervised('train.txt', lr=0.1, wordNgrams=2, epoch=15)
-classifier3 = ft.FastText.train_supervised('train.txt', lr=0.1, wordNgrams=3, epoch=15)
+print('start fasttext training...')
+#data/train_new_fasttext_formated.csv
+classifier1 = ft.FastText.train_supervised('./data/train_new_fasttext_formated.csv', lr=0.1, wordNgrams=1, epoch=15)
+#classifier2 = ft.FastText.train_supervised('train.txt', lr=0.1, wordNgrams=2, epoch=15)
+#classifier3 = ft.FastText.train_supervised('train.txt', lr=0.1, wordNgrams=3, epoch=15)
 
 # Predict test data
-predictions1 = classifier1.predict(df_test.ingredients.tolist())
-predictions2 = classifier2.predict(df_test.ingredients.tolist())
-predictions3 = classifier3.predict(df_test.ingredients.tolist())
+print('start fasttext predicting...')
+predictions1 = classifier1.predict(test_df.question_text.tolist())
+#predictions2 = classifier2.predict(df_test.ingredients.tolist())
+#predictions3 = classifier3.predict(df_test.ingredients.tolist())
 
-# Combine predictions
-majority_vote = np.array([])
-for i in range(len(predictions1[0])):
-    majority_vote = np.append(majority_vote, Counter([predictions1[0][i][0],
-                                                   predictions2[0][i][0],
-                                                   predictions3[0][i][0]]).most_common(1)[0][0])
+print('predictions1 is ', predictions1)
+
+sys.exit(0)
+
+
 
 # Write submission file
-submit = pd.DataFrame({'id': df_test.id, 
-                       'cuisine': pd.Series(majority_vote)})
+submit = pd.DataFrame({'id': df_test.id, 'cuisine': pd.Series(majority_vote)})
 submit.cuisine = submit.cuisine.apply(lambda x: re.sub('__label__', '', x))
 submit.to_csv('submit.csv', index=False)
 
