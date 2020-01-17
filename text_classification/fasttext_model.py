@@ -52,6 +52,7 @@ def create_fasttext_format_files():
     return  train_df, val_df, test_df
 
 train_df, val_df, test_df = create_fasttext_format_files()
+test_df = test_df.sample(30)  # 减少数据，便于观察
 
 # Function to do K-fold CV across different fasttext parameter values
 def tune(Y, X, YX, k, lr, wordNgrams, epoch):
@@ -111,7 +112,9 @@ predictions1 = classifier1.predict(test_df.question_text.tolist())
 #predictions2 = classifier2.predict(df_test.ingredients.tolist())
 #predictions3 = classifier3.predict(df_test.ingredients.tolist())
 
+print('type of predictions1 is ', type(predictions1))
 print('predictions1 is ', predictions1)
+print('test_df.label is ', test_df.label)
 
 sys.exit(0)
 
