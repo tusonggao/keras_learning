@@ -141,17 +141,3 @@ if __name__=='__main__':
     LinearSVC_test(train_X, train_y, test_X, test_y)
     RBFSVC_test(train_X, train_y, test_X, test_y)
     MultinomialNB_test(train_X, train_y, test_X, test_y)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
