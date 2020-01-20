@@ -33,6 +33,8 @@ dict_path = bert_path_prefix + "vocab.txt"
 data_path_prefix = './'
 train_df = pd.read_excel(data_path_prefix + './train_new.csv')
 test_df = pd.read_excel(data_path_prefix + './test_new.csv')
+train_df, test_df = train_df.sample(20000), test_df.sample(20000)
+
 origin_train_data = [(text, target) for text, target in zip(train_df.question_text.values, train_df.target.values)]
 test_data = [(text, target) for text, target in zip(test_df.question_text.values, test_df.target.values)]
 
@@ -41,23 +43,12 @@ random.seed(2018)
 random.shuffle(train_data)
 train_num = int(0.9*len(data))
 train_data = origin_train_data[:train_num]
-val_data = origin_train_data[train_num:]
-
-print('neg.shape is ', neg.shape, 'pos.shape is', pos.shape)
-
-# 构建训练数据
-data = []
+valid_data = origin_train_data[train_num:]
 
 # 读取字典
 token_dict = load_vocabulary(dict_path)
 # 建立分词器
 tokenizer = Tokenizer(token_dict)
-
-# 按照9:1的比例划分训练集和验证集
-random_order = list(range(len(data)))
-np.random.shuffle(random_order)
-train_data = [data[j] for i, j in enumerate(random_order) if i % 10 != 0]
-valid_data = [data[j] for i, j in enumerate(random_order) if i % 10 == 0]
 
 print('prog get here 222')
 
@@ -130,6 +121,10 @@ model.fit_generator(
     validation_data=valid_D.__iter__(),
     validation_steps=len(valid_D)
 )
+
+print('prog get here 333, final ends here')
+
+model.fit
 
 print('prog ends here!')
 
