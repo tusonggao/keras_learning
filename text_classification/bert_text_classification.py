@@ -5,6 +5,7 @@ from __future__ import print_function, division, with_statement
 import os
 import sys
 import time
+import random
 import numpy as np
 import pandas as pd
 
@@ -21,7 +22,7 @@ maxlen = 100
 batch_size = 16
 droup_out_rate = 0.5
 learning_rate = 1e-5
-epochs = 15
+epochs = 2
 
 # 下载下来的英文版本的bert的预处理模型路径 https://github.com/google-research/bert
 bert_path_prefix = '/home/ubuntu/ftpfile/wwm_cased_L-24_H-1024_A-16/' 
@@ -30,18 +31,18 @@ checkpoint_path = bert_path_prefix + "bert_model.ckpt"
 dict_path = bert_path_prefix + "vocab.txt"
 
 # 读取数据
-data_path_prefix = './'
-train_df = pd.read_excel(data_path_prefix + './train_new.csv')
-test_df = pd.read_excel(data_path_prefix + './test_new.csv')
-train_df, test_df = train_df.sample(20000), test_df.sample(20000)
+data_path_prefix = './data/'
+train_df = pd.read_csv(data_path_prefix + './train_new.csv')
+test_df = pd.read_csv(data_path_prefix + './test_new.csv')
+train_df, test_df = train_df.sample(2000), test_df.sample(2000)
 
 origin_train_data = [(text, target) for text, target in zip(train_df.question_text.values, train_df.target.values)]
 test_data = [(text, target) for text, target in zip(test_df.question_text.values, test_df.target.values)]
 
 # 按照0.9:0.1的比例，随机切分成训练集和校验集
 random.seed(2018)
-random.shuffle(train_data)
-train_num = int(0.9*len(data))
+random.shuffle(origin_train_data)
+train_num = int(0.9*len(origin_train_data))
 train_data = origin_train_data[:train_num]
 valid_data = origin_train_data[train_num:]
 
@@ -114,8 +115,8 @@ class test_data_generator:
                     Y = seq_padding(Y)
                     yield [X1, X2]
                     X1, X2 = [], []
-                if i==idxs[-1]:
-                    break
+                    if i==idxs[-1]:
+                        break
 
 
 # trainable设置True对Bert进行微调
@@ -156,10 +157,12 @@ print('prog get here 444, training ends here, cost time ', time.time() - start_t
 
 test_D = data_generator(test_data)
 y_lst = []
-for y in model.predict(test_D)
+for y in model.predict_generator(test_D):
+    pritn('y is ', y)
     y_lst += y
 
 print('len of y_lst is ', len(y_lst))
+print('y_lst is ', y_lst)
 
 print('prog ends here!')
 
