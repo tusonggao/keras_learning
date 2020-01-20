@@ -30,25 +30,23 @@ checkpoint_path = bert_path_prefix + "bert_model.ckpt"
 dict_path = bert_path_prefix + "vocab.txt"
 
 # 读取数据
-data_path_prefix = "./"
-neg = pd.read_excel(data_path_prefix + "./data/neg.xls", header=None)
-pos = pd.read_excel(data_path_prefix + "./data/pos.xls", header=None)
+data_path_prefix = './'
+train_df = pd.read_excel(data_path_prefix + './train_new.csv')
+test_df = pd.read_excel(data_path_prefix + './test_new.csv')
+
+train_data = [(text, target) for text, target in zip(train_df.question_text.values, train_df.target.values)]
+test_data = [(text, target) for text, target in zip(test_df.question_text.values, test_df.target.values)]
+
+random.seed(2018)
+random.shuffle(train_data)
+train_num = int(0.9*len(data))
+train_data = train_data[:train_num]
+val_data = train_data[:int(0.9*len(
 
 print('neg.shape is ', neg.shape, 'pos.shape is', pos.shape)
 
 # 构建训练数据
 data = []
-
-for d in neg[0]:
-    data.append((d, 0))
-
-for d in pos[0]:
-    data.append((d, 1))
-
-# 读取字典
-token_dict = load_vocabulary(dict_path)
-# 建立分词器
-tokenizer = Tokenizer(token_dict)
 
 # 读取字典
 token_dict = load_vocabulary(dict_path)
