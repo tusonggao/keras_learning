@@ -1,5 +1,6 @@
 # https://www.cnblogs.com/dogecheng/p/11617940.html
 # https://www.cnblogs.com/dogecheng/p/11824494.html
+
 from __future__ import print_function, division, with_statement
 import os
 import sys
@@ -8,6 +9,9 @@ import numpy as np
 import pandas as pd
 
 from keras_bert import load_trained_model_from_checkpoint, Tokenizer
+
+print('prog starts here!')
+
 # 超参数
 maxlen = 100
 batch_size = 16
@@ -15,15 +19,17 @@ droup_out_rate = 0.5
 learning_rate = 1e-5
 epochs = 15
 
-path_prefix = "./test"
+data_path_prefix = "./test"
+bert_path_prefix = '/home/ubuntu/ftpfile/chinese_wwm_ext_L-12_H-768_A-12/'
+
 # 预训练模型目录
-config_path = path_prefix + "/chinese_L-12_H-768_A-12/bert_config.json"
-checkpoint_path = path_prefix + "/chinese_L-12_H-768_A-12/bert_model.ckpt"
-dict_path = path_prefix + "/chinese_L-12_H-768_A-12/vocab.txt"
+config_path = bert_path_prefix + "/chinese_L-12_H-768_A-12/bert_config.json"
+checkpoint_path = bert_path_prefix + "/chinese_L-12_H-768_A-12/bert_model.ckpt"
+dict_path = bert_path_prefix + "/chinese_L-12_H-768_A-12/vocab.txt"
 
 # 读取数据
-neg = pd.read_excel(path_prefix + "/data/neg.xls", header=None)
-pos = pd.read_excel(path_prefix + "/data/pos.xls", header=None)
+neg = pd.read_excel(path_prefix + "./data/neg.xls", header=None)
+pos = pd.read_excel(path_prefix + "./data/pos.xls", header=None)
 
 # 构建训练数据
 data = []
@@ -57,7 +63,6 @@ def seq_padding(X, padding=0):
     return np.array([
         np.concatenate([x, [padding] * (ML - len(x))]) if len(x) < ML else x for x in X
     ])
-
 
 class data_generator:
     def __init__(self, data, batch_size=batch_size):
