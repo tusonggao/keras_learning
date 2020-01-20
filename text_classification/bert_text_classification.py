@@ -88,6 +88,35 @@ class data_generator:
                     yield [X1, X2], Y
                     [X1, X2, Y] = [], [], []
 
+class test_data_generator:
+    def __init__(self, data, batch_size=batch_size):
+        self.data = data
+        self.batch_size = batch_size
+        self.steps = len(self.data) // self.batch_size
+        if len(self.data) % self.batch_size != 0:
+            self.steps += 1
+    def __len__(self):
+        return self.steps
+    def __iter__(self):
+        while True:
+            idxs = list(range(len(self.data)))
+            #np.random.shuffle(idxs)
+            X1, X2= [], []
+            for i in idxs:
+                d = self.data[i]
+                text = d[0][:maxlen]
+                x1, x2 = tokenizer.encode(first=text)
+                X1.append(x1)
+                X2.append(x2)
+                if len(X1) == self.batch_size or i == idxs[-1]:
+                    X1 = seq_padding(X1)
+                    X2 = seq_padding(X2)
+                    Y = seq_padding(Y)
+                    yield [X1, X2]
+                    X1, X2 = [], []
+                if i==idxs[-1]:
+                    break
+
 
 # trainable设置True对Bert进行微调
 # 默认不对Bert模型进行调参
@@ -109,11 +138,12 @@ model.compile(
 )
 model.summary()
 
-print('prog get here 333')
-
 train_D = data_generator(train_data)
 valid_D = data_generator(valid_data)
 
+print('prog get here 333, start training...')
+
+start_t = time.time()
 model.fit_generator(
     train_D.__iter__(),
     steps_per_epoch=len(train_D),
@@ -122,9 +152,14 @@ model.fit_generator(
     validation_steps=len(valid_D)
 )
 
-print('prog get here 333, final ends here')
+print('prog get here 444, training ends here, cost time ', time.time() - start_t)
 
-model.fit
+test_D = data_generator(test_data)
+y_lst = []
+for y in model.predict(test_D)
+    y_lst += y
+
+print('len of y_lst is ', len(y_lst))
 
 print('prog ends here!')
 
