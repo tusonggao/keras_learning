@@ -23,8 +23,8 @@ droup_out_rate = 0.5
 learning_rate = 1e-5
 epochs = 15
 
-# 预训练模型目录
-bert_path_prefix = '/home/ubuntu/ftpfile/chinese_wwm_ext_L-12_H-768_A-12/'
+# 下载下来的英文版本的bert的预处理模型路径 https://github.com/google-research/bert
+bert_path_prefix = '/home/ubuntu/ftpfile/wwm_cased_L-24_H-1024_A-16/' 
 config_path = bert_path_prefix + "bert_config.json"
 checkpoint_path = bert_path_prefix + "bert_model.ckpt"
 dict_path = bert_path_prefix + "vocab.txt"
@@ -33,15 +33,15 @@ dict_path = bert_path_prefix + "vocab.txt"
 data_path_prefix = './'
 train_df = pd.read_excel(data_path_prefix + './train_new.csv')
 test_df = pd.read_excel(data_path_prefix + './test_new.csv')
-
-train_data = [(text, target) for text, target in zip(train_df.question_text.values, train_df.target.values)]
+origin_train_data = [(text, target) for text, target in zip(train_df.question_text.values, train_df.target.values)]
 test_data = [(text, target) for text, target in zip(test_df.question_text.values, test_df.target.values)]
 
+# 按照0.9:0.1的比例，随机切分成训练集和校验集
 random.seed(2018)
 random.shuffle(train_data)
 train_num = int(0.9*len(data))
-train_data = train_data[:train_num]
-val_data = train_data[:int(0.9*len(
+train_data = origin_train_data[:train_num]
+val_data = origin_train_data[train_num:]
 
 print('neg.shape is ', neg.shape, 'pos.shape is', pos.shape)
 
