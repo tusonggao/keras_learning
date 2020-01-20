@@ -1,6 +1,6 @@
 # https://www.cnblogs.com/dogecheng/p/11617940.html
 # https://www.cnblogs.com/dogecheng/p/11824494.html
-
+# https://github.com/bojone/bert_in_keras/blob/master/sentiment.py
 from __future__ import print_function, division, with_statement
 import os
 import sys
@@ -8,7 +8,11 @@ import time
 import numpy as np
 import pandas as pd
 
-from keras_bert import load_trained_model_from_checkpoint, Tokenizer
+from keras_bert import load_trained_model_from_checkpoint, load_vocabulary, Tokenizer
+from keras.layers import *
+from keras.models import Model
+import keras.backend as K
+from keras.optimizers import Adam
 
 print('prog starts here!')
 
@@ -19,17 +23,18 @@ droup_out_rate = 0.5
 learning_rate = 1e-5
 epochs = 15
 
-data_path_prefix = "./test"
-bert_path_prefix = '/home/ubuntu/ftpfile/chinese_wwm_ext_L-12_H-768_A-12/'
-
 # 预训练模型目录
-config_path = bert_path_prefix + "/chinese_L-12_H-768_A-12/bert_config.json"
-checkpoint_path = bert_path_prefix + "/chinese_L-12_H-768_A-12/bert_model.ckpt"
-dict_path = bert_path_prefix + "/chinese_L-12_H-768_A-12/vocab.txt"
+bert_path_prefix = '/home/ubuntu/ftpfile/chinese_wwm_ext_L-12_H-768_A-12/'
+config_path = bert_path_prefix + "bert_config.json"
+checkpoint_path = bert_path_prefix + "bert_model.ckpt"
+dict_path = bert_path_prefix + "vocab.txt"
 
 # 读取数据
-neg = pd.read_excel(path_prefix + "./data/neg.xls", header=None)
-pos = pd.read_excel(path_prefix + "./data/pos.xls", header=None)
+data_path_prefix = "./"
+neg = pd.read_excel(data_path_prefix + "./data/neg.xls", header=None)
+pos = pd.read_excel(data_path_prefix + "./data/pos.xls", header=None)
+
+print('neg.shape is ', neg.shape, 'pos.shape is', pos.shape)
 
 # 构建训练数据
 data = []
@@ -39,7 +44,6 @@ for d in neg[0]:
 
 for d in pos[0]:
     data.append((d, 1))
-
 
 # 读取字典
 token_dict = load_vocabulary(dict_path)
@@ -56,6 +60,8 @@ random_order = list(range(len(data)))
 np.random.shuffle(random_order)
 train_data = [data[j] for i, j in enumerate(random_order) if i % 10 != 0]
 valid_data = [data[j] for i, j in enumerate(random_order) if i % 10 == 0]
+
+print('prog get here 222')
 
 def seq_padding(X, padding=0):
     L = [len(x) for x in X]
@@ -94,14 +100,9 @@ class data_generator:
                     [X1, X2, Y] = [], [], []
 
 
-from keras.layers import *
-from keras.models import Model
-import keras.backend as K
-from keras.optimizers import Adam
-
 # trainable设置True对Bert进行微调
 # 默认不对Bert模型进行调参
-bert_model = load_trained_model_from_checkpoint(config_path, checkpoint_path, , trainable=True)
+bert_model = load_trained_model_from_checkpoint(config_path, checkpoint_path, trainable=True)
 
 x1_in = Input(shape=(None,))
 x2_in = Input(shape=(None,))
@@ -119,6 +120,7 @@ model.compile(
 )
 model.summary()
 
+print('prog get here 333')
 
 train_D = data_generator(train_data)
 valid_D = data_generator(valid_data)
