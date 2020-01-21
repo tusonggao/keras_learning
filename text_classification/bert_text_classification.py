@@ -34,7 +34,7 @@ dict_path = bert_path_prefix + "vocab.txt"
 data_path_prefix = './data/'
 train_df = pd.read_csv(data_path_prefix + './train_new.csv')
 test_df = pd.read_csv(data_path_prefix + './test_new.csv')
-train_df, test_df = train_df.sample(2000), test_df.sample(2000)
+train_df, test_df = train_df.sample(2000), test_df.sample(200)
 
 origin_train_data = [(text, target) for text, target in zip(train_df.question_text.values, train_df.target.values)]
 test_data = [(text, target) for text, target in zip(test_df.question_text.values, test_df.target.values)]
@@ -99,28 +99,23 @@ class test_data_generator:
     def __len__(self):
         return self.steps
     def __iter__(self):
-        while True:
-            idxs = list(range(len(self.data)))
-            #np.random.shuffle(idxs)
-            X1, X2= [], []
-            for i in idxs:
-                d = self.data[i]
-                text = d[0][:maxlen]
-                x1, x2 = tokenizer.encode(first=text)
-                X1.append(x1)
-                X2.append(x2)
-                if len(X1) == self.batch_size or i == idxs[-1]:
-                    X1 = seq_padding(X1)
-                    X2 = seq_padding(X2)
-                    Y = seq_padding(Y)
-                    yield [X1, X2]
-                    X1, X2 = [], []
-                    if i==idxs[-1]:
-                        break
+        idxs = list(range(len(self.data)))
+        X1, X2= [], []
+        for i in idxs:
+            d = self.data[i]
+            text = d[0][:maxlen]
+            x1, x2 = tokenizer.encode(first=text)
+            X1.append(x1)
+            X2.append(x2)
+            if len(X1) == self.batch_size or i == idxs[-1]:
+                X1 = seq_padding(X1)
+                X2 = seq_padding(X2)
+                yield [X1, X2]
+                X1, X2 = [], []
+            if i==idxs[-1]:
+                break
 
-
-# trainable设置True对Bert进行微调
-# 默认不对Bert模型进行调参
+# trainable设置True对Bert进行微调 默认不对Bert模型进行调参
 bert_model = load_trained_model_from_checkpoint(config_path, checkpoint_path, trainable=True)
 
 x1_in = Input(shape=(None,))
@@ -156,11 +151,9 @@ model.fit_generator(
 print('prog get here 444, training ends here, cost time ', time.time() - start_t)
 
 test_D = test_data_generator(test_data)
-y_lst = model.predict_generator(test_D, steps=batch_size)
+y_lst = model.predict_generator(test_D.__iter__(), steps=batch_size)
 
-print('len of y_lst is ', len(y_lst))
 print('y_lst is ', y_lst)
+print('len of y_lst is ', len(y_lst), 'len of test_data is ', len(test_data))
 
 print('prog ends here!')
-
-
