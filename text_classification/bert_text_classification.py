@@ -156,10 +156,7 @@ model.fit_generator(
 print('prog get here 444, training ends here, cost time ', time.time() - start_t)
 
 test_D = test_data_generator(test_data)
-y_lst = []
-for y in model.predict_generator(test_D, steps=batch_size):
-    pritn('y is ', y)
-    y_lst += y
+y_lst = model.predict_generator(test_D, steps=batch_size)
 
 print('len of y_lst is ', len(y_lst))
 print('y_lst is ', y_lst)
