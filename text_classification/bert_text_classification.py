@@ -22,7 +22,7 @@ maxlen = 100
 batch_size = 16
 droup_out_rate = 0.5
 learning_rate = 1e-5
-epochs = 2
+epochs = 1
 
 # 下载下来的英文版本的bert的预处理模型路径 https://github.com/google-research/bert
 bert_path_prefix = '/home/ubuntu/ftpfile/wwm_cased_L-24_H-1024_A-16/' 
@@ -150,14 +150,14 @@ model.fit_generator(
     steps_per_epoch=len(train_D),
     epochs=epochs,
     validation_data=valid_D.__iter__(),
-    validation_steps=len(valid_D)
+    validation_steps=len(valid_D),
 )
 
 print('prog get here 444, training ends here, cost time ', time.time() - start_t)
 
-test_D = data_generator(test_data)
+test_D = test_data_generator(test_data)
 y_lst = []
-for y in model.predict_generator(test_D):
+for y in model.predict_generator(test_D, steps=batch_size):
     pritn('y is ', y)
     y_lst += y
 
